@@ -8,6 +8,7 @@ import javax.swing.JButton;
 
 public class TempSender extends SnuffCommandModule {
 	JButton send;
+	byte[] packet = { 'U', 'I', 'C', 1, 'T' };
 	
 	TempSender(SnuffCommandCenter scc) {
 		super(scc);
@@ -19,7 +20,7 @@ public class TempSender extends SnuffCommandModule {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		SCC.send()
+		SCC.send(this, packet);
 		
 	}
 
