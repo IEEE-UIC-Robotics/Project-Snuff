@@ -10,8 +10,6 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class SnuffCommandCenter extends JFrame implements ActionListener, Serial.SerialListener {
 	
-	public static Scanner in = new Scanner(System.in);
-	
 	public static void main(String[] args) {
 		new SnuffCommandCenter();
 	}
@@ -31,11 +29,12 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	// +-----------+ //
 	
 	private Serial serial;
-	private JLabel portsLabel;
 	private JMenu connectionMenu;
 	private JMenuItem scanPortsMenuItem;
 	private JMenuItem disconnectMenuItem;
 	private List<JMenuItem> portMenuItems;
+	private JMenu commandModulesMenu;
+	private JMenuItem generalMessageSenderMenuItem;
 	
 	// +-------------+ //
 	// | CONSTRUCTOR | //
@@ -47,27 +46,6 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		setupGUI();
 		
 		serial = new Serial(SERIAL_BAUD_RATE, this);
-		
-		GeneralMessageSender sender = new GeneralMessageSender(this);
-		
-		List<String> portNames = serial.getPortNames();
-		
-		int i = 0;
-		for (String portName : portNames)
-			pl(i++ + ": " + portName);
-		
-		String msg = "";
-		while (msg != null) {
-			p("SEND: ");
-			msg = in.nextLine();
-			if ("kill".equals(msg)) {
-				serial.disconnect();
-			}
-			else{
-				serial.write(msg);
-			}
-		}
-
 	}
 	
 	public static void p(String s) {
@@ -91,7 +69,11 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		if (source == scanPortsMenuItem) {
+		
+		if (source == generalMessageSenderMenuItem) {
+			new GeneralMessageSender(this);
+		}
+		else if (source == scanPortsMenuItem) {
 			updateConnectionMenu(null);
 		}
 		else if (source == disconnectMenuItem) {
@@ -136,15 +118,11 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	// +-------------+ //
 	
 	private void setupGUI() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(400, 400));
-		setResizable(false);
-		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-		getContentPane().add(portsLabel = new JLabel());
-		getContentPane().add(new JButton("FAKE"));
 		initializeMenuBar();
 		pack();
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -155,21 +133,25 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 				disconnectMenuItem = new JMenuItem("DISCONNECT");
 				scanPortsMenuItem = new JMenuItem("SCAN PORTS");
 				portMenuItems = new ArrayList<JMenuItem>(4);
+			commandModulesMenu = new JMenu("<COMMAND MODULES>");
+				generalMessageSenderMenuItem = new JMenuItem("General Message Sender");
 		
-		connectionMenu.setFont(new Font(connectionMenu.getFont().getName(), Font.BOLD, 20));
-		disconnectMenuItem.setFont(new Font(disconnectMenuItem.getFont().getName(), Font.BOLD, 20));
-		scanPortsMenuItem.setFont(new Font(scanPortsMenuItem.getFont().getName(), Font.BOLD, 20));
-		
-		connectionMenu.setMnemonic( KeyEvent.VK_C );
-		disconnectMenuItem.setMnemonic( KeyEvent.VK_D );
-		scanPortsMenuItem.setMnemonic( KeyEvent.VK_P );
-		
+		Font menuFont = new Font(connectionMenu.getFont().getName(), Font.BOLD, 20);
+		connectionMenu.setFont(menuFont);
+		disconnectMenuItem.setFont(menuFont);
+		scanPortsMenuItem.setFont(menuFont);
+		commandModulesMenu.setFont(menuFont);
+		generalMessageSenderMenuItem.setFont(menuFont);
+
 		setJMenuBar(menu);
 			menu.add(connectionMenu);
+			menu.add(commandModulesMenu);
 			connectionMenu.add(scanPortsMenuItem);
+			commandModulesMenu.add(generalMessageSenderMenuItem);
 		
 		disconnectMenuItem.addActionListener(this);
 		scanPortsMenuItem.addActionListener(this);
+		generalMessageSenderMenuItem.addActionListener(this);
 	}
 	
 }
