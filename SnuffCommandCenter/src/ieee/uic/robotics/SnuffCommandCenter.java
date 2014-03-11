@@ -14,6 +14,14 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		new SnuffCommandCenter();
 	}
 	
+	public static void p(String s) {
+		System.out.print(s);
+	}
+	
+	public static void pl(String s) {
+		System.out.println(s);
+	}
+	
 	// +-----------+ //
 	// | CONSTANTS | //
 	// +-----------+ //
@@ -29,12 +37,15 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	// +-----------+ //
 	
 	private Serial serial;
+	private SnuffCommandModule cmWaitingForResponse;
+	
 	private JMenu connectionMenu;
 	private JMenuItem scanPortsMenuItem;
 	private JMenuItem disconnectMenuItem;
 	private List<JMenuItem> portMenuItems;
 	private JMenu commandModulesMenu;
 	private JMenuItem generalMessageSenderMenuItem;
+	private JMenuItem tempSenderMenuItem;
 	
 	// +-------------+ //
 	// | CONSTRUCTOR | //
@@ -48,14 +59,14 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		serial = new Serial(SERIAL_BAUD_RATE, this);
 	}
 	
-	public static void p(String s) {
-		System.out.print(s);
+	public void send(SnuffCommandModule sender, byte[] packet) {
+		if (serial.isConnected()) {
+			serial.write(packet);
+			if (sender != null)
+				cmWaitingForResponse = sender;
+		}
 	}
 	
-	public static void pl(String s) {
-		System.out.println(s);
-	}
-
 	@Override
 	public void handleSerialError(String info) {
 		pl("SERIAL ERROR: " + info + ")");
@@ -64,6 +75,10 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	@Override
 	public void handleSerialData(byte[] data) {
 		pl("DATA RECEIVED: " + new String(data));
+		if (cmWaitingForResponse != null) {
+			cmWaitingForResponse.processResponse(data);
+			cmWaitingForResponse = null;
+		}
 	}
 
 	@Override
@@ -72,6 +87,9 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		
 		if (source == generalMessageSenderMenuItem) {
 			new GeneralMessageSender(this);
+		}
+		else if (source == tempSenderMenuItem) {
+			new tempSender(this);
 		}
 		else if (source == scanPortsMenuItem) {
 			updateConnectionMenu(null);
@@ -135,6 +153,7 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 				portMenuItems = new ArrayList<JMenuItem>(4);
 			commandModulesMenu = new JMenu("<COMMAND MODULES>");
 				generalMessageSenderMenuItem = new JMenuItem("General Message Sender");
+				tempSenderMenuItem = new JMenuItem("Temp Sender");
 		
 		Font menuFont = new Font(connectionMenu.getFont().getName(), Font.BOLD, 20);
 		connectionMenu.setFont(menuFont);
@@ -142,16 +161,19 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		scanPortsMenuItem.setFont(menuFont);
 		commandModulesMenu.setFont(menuFont);
 		generalMessageSenderMenuItem.setFont(menuFont);
+		tempSenderMenuItem.setFont(menuFont);
 
 		setJMenuBar(menu);
 			menu.add(connectionMenu);
 			menu.add(commandModulesMenu);
 			connectionMenu.add(scanPortsMenuItem);
 			commandModulesMenu.add(generalMessageSenderMenuItem);
+			commandModulesMenu.add(tempSenderMenuItem);
 		
 		disconnectMenuItem.addActionListener(this);
 		scanPortsMenuItem.addActionListener(this);
 		generalMessageSenderMenuItem.addActionListener(this);
+		tempSenderMenuItem.addActionListener(this);
 	}
 	
 }

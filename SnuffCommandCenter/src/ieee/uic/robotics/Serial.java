@@ -54,6 +54,10 @@ public class Serial implements SerialPortEventListener {
 	    return newPortNames;
 	}
 	
+	public boolean isConnected() {
+		return port != null;
+	}
+	
 	public boolean connect(String portName, String owner) {
         try {
         	CommPortIdentifier portID;
