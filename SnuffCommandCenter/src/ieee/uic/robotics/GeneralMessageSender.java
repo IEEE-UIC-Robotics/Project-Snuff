@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -17,6 +18,7 @@ public class GeneralMessageSender extends SnuffCommandModule {
 	JButton sendButton;
 	JCheckBox sigCheckBox;
 	ByteEntryComponent componentOne;
+	JButton addComponentButton;
 	ArrayList<ByteEntryComponent> componentList;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -27,9 +29,19 @@ public class GeneralMessageSender extends SnuffCommandModule {
 		sigCheckBox = new JCheckBox("Signature", false);
 		componentList = new ArrayList();
 		componentOne = new ByteEntryComponent();
+		addComponentButton = new JButton("+");
+		addComponentButton.addActionListener(this);
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		this.add(addComponentButton);
 		this.add(componentOne);
+		this.add(new ByteEntryComponent());
 		this.pack();
 		this.setVisible(true);
+	}
+	
+	public void addComponent(ByteEntryComponent comp) {
+		this.add(comp);
+		this.pack();
 	}
 	
 	private class ByteEntryComponent extends JPanel implements ActionListener {
@@ -38,15 +50,12 @@ public class GeneralMessageSender extends SnuffCommandModule {
 		boolean isDec;
 		@SuppressWarnings("rawtypes")
 		JComboBox msgTypeButton;
-		JButton addComponentButton;
 		
 		ByteEntryComponent() {
 			isHex = true;
 			isDec = false;
 			msgTypeButton = createMsgTypeButton();
-			addComponentButton = new JButton();
 			this.add(msgTypeButton);
-			this.add(addComponentButton);
 		}
 		
 		private JComboBox createMsgTypeButton() {
@@ -59,25 +68,36 @@ public class GeneralMessageSender extends SnuffCommandModule {
 		}
 		
 		public void actionPerformed(ActionEvent event) {
-			JComboBox temp = (JComboBox)event.getSource();
-			String msgType = (String)temp.getSelectedItem();
-			if(msgType.equals(msgTypes[0])) {
-				isHex = true;
-				isDec = false;
+			Object src = event.getSource();
+			if(src == msgTypeButton) {
+				JComboBox temp = (JComboBox)event.getSource();
+				String msgType = (String)temp.getSelectedItem();
+				if(msgType.equals(msgTypes[0])) {
+					isHex = true;
+					isDec = false;
+				}
+				else {
+					isHex = false;
+					isDec = true;
+				}
+				System.out.println("HEX: " + isHex + " - DEC: " + isDec);
 			}
-			else {
-				isHex = false;
-				isDec = true;
-			}
-			System.out.println("HEX: " + isHex + " - DEC: " + isDec);
+			
 			// updateLabel(msgType);
 		}
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed(ActionEvent event) {
 		// TODO Auto-generated method stub
-		
+		Object src = event.getSource();
+		if(src == addComponentButton) {
+			ByteEntryComponent temp = new ByteEntryComponent();
+			//this.remove(addComponentButton);
+			this.add(temp);
+			pack();
+			System.out.println("POOP");
+		}
 	}
 
 	@Override
