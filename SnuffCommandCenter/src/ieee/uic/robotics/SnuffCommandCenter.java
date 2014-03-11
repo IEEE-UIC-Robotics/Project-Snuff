@@ -46,6 +46,7 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	private JMenu commandModulesMenu;
 	private JMenuItem generalMessageSenderMenuItem;
 	private JMenuItem tempSenderMenuItem;
+	private SnuffConsole console;
 	
 	// +-------------+ //
 	// | CONSTRUCTOR | //
@@ -53,6 +54,8 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	
 	public SnuffCommandCenter() {
 		super(WINDOW_TITLE);
+		
+		console = new SnuffConsole();
 		
 		setupGUI();
 		
@@ -139,6 +142,7 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(400, 400));
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().add(console);
 		initializeMenuBar();
 		pack();
 		setLocationRelativeTo(null);
