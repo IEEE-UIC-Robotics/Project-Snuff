@@ -89,7 +89,7 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 			new GeneralMessageSender(this);
 		}
 		else if (source == tempSenderMenuItem) {
-			new tempSender(this);
+			new TempSender(this);
 		}
 		else if (source == scanPortsMenuItem) {
 			updateConnectionMenu(null);
