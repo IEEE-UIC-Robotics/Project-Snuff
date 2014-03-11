@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 @SuppressWarnings("serial")
 public abstract class SnuffCommandModule extends JFrame implements ActionListener {
 	
-	private final SnuffCommandCenter SCC;
+	protected final SnuffCommandCenter SCC;
 	
 	SnuffCommandModule(SnuffCommandCenter scc) {
 		SCC = scc;
