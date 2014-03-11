@@ -48,6 +48,8 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		
 		serial = new Serial(SERIAL_BAUD_RATE, this);
 		
+		GeneralMessageSender sender = new GeneralMessageSender(this);
+		
 		List<String> portNames = serial.getPortNames();
 		
 		int i = 0;
