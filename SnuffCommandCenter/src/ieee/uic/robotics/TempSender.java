@@ -16,6 +16,7 @@ public class TempSender extends SnuffCommandModule {
 		send = new JButton("Send");
 		add(send);
 		pack();
+		setVisible(true);
 	}
 
 	@Override
