@@ -16,16 +16,8 @@ public class Serial implements SerialPortEventListener {
 	// +-----------+ //
 	
 	public interface SerialListener {
-		void handleSerialEvent(SerialEvent event, String info);
+		void handleSerialError(String info);
 		void handleSerialData(byte[] data);
-	}
-	
-	// +----------------+ //
-	// | INTERFACE ENUM | //
-	// +----------------+ //
-	
-	public enum SerialEvent {
-		PORT_DETECTED, PORT_REMOVED, DATA_RECEIVED, ERROR;
 	}
 	
 	// +-----------+ //
@@ -34,7 +26,6 @@ public class Serial implements SerialPortEventListener {
 	
 	public final int BAUD_RATE;
 	private final SerialListener listener;
-	private final List<String> portNames;
 	private SerialPort port;
 		
 	// +-------------+ //
@@ -44,8 +35,6 @@ public class Serial implements SerialPortEventListener {
 	public Serial(int baudrate, SerialListener sl) {
     	BAUD_RATE = baudrate;
     	listener = sl;
-    	portNames = new ArrayList<String>();
-		new Timer().schedule(new PortChecker(), 0, 500);
     }
     
 	// +----------------+ //
@@ -53,7 +42,16 @@ public class Serial implements SerialPortEventListener {
 	// +----------------+ //
 	
 	public List<String> getPortNames() {
-	    return new ArrayList<String>(portNames);
+		List<String> newPortNames;
+		Enumeration<CommPortIdentifier> ports;
+		
+		newPortNames = new ArrayList<String>(4);
+		ports = CommPortIdentifier.getPortIdentifiers();
+		
+	    while(ports.hasMoreElements())
+	    	newPortNames.add(ports.nextElement().getName());
+	    
+	    return newPortNames;
 	}
 	
 	public boolean connect(String portName, String owner) {
@@ -155,44 +153,8 @@ public class Serial implements SerialPortEventListener {
         return true;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private synchronized void checkPorts() {
-		List<String> newPortNames;
-		Enumeration<CommPortIdentifier> ports;
-		
-		newPortNames = new ArrayList<String>(Math.max(1, portNames.size()));
-		ports = CommPortIdentifier.getPortIdentifiers();
-		
-	    while(ports.hasMoreElements())
-	    	newPortNames.add(ports.nextElement().getName());
-	    
-	    for (int p = 0; p < portNames.size(); p++) {
-	    	String portName = portNames.get(p);
-	    	if (newPortNames.remove(portName) == false) {
-	    		portNames.remove(p--);
-	    		if (port != null && port.getName().equals(portName))
-	    			disconnect();
-	    		listener.handleSerialEvent(SerialEvent.PORT_REMOVED, portName);
-	    	}
-	    }
-	    
-	    for (String portName : newPortNames) {
-	    	portNames.add(portName);
-	    	listener.handleSerialEvent(SerialEvent.PORT_DETECTED, portName);
-	    }
-	}
-	
 	private void error(String err) {
-		listener.handleSerialEvent(SerialEvent.ERROR, err);
+		listener.handleSerialError(err);
 	}
 	
-	// +---------------------+ //
-	// | CLASS: PORT CHECKER | //
-	// +---------------------+ //
-	
-	private class PortChecker extends TimerTask {
-	    public void run() {
-	    	checkPorts();
-	    }
-	}
-}  
+}

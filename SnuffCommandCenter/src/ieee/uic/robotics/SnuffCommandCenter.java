@@ -1,7 +1,5 @@
 package ieee.uic.robotics;
 
-import ieee.uic.robotics.Serial.SerialEvent;
-
 import java.util.*;
 import java.util.List;
 import java.awt.*;
@@ -35,6 +33,7 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	private Serial serial;
 	private JLabel portsLabel;
 	private JMenu connectionMenu;
+	private JMenuItem scanPortsMenuItem;
 	private JMenuItem disconnectMenuItem;
 	private List<JMenuItem> portMenuItems;
 	
@@ -55,28 +54,12 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 		for (String portName : portNames)
 			pl(i++ + ": " + portName);
 		
-		pl("CHOOSE PORT TO OPEN:");
-		int portIndex = in.nextInt();
-		
-		try {
-			pl("OPENING PORT " + portIndex + " (" + portNames.get(portIndex) + ")");
-			serial.connect(portNames.get(portIndex), WINDOW_TITLE);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		pl("WRITING STUFF");
-		serial.write("FUCK YOU\n");
-		
 		String msg = "";
 		while (msg != null) {
+			p("SEND: ");
 			msg = in.nextLine();
 			if ("kill".equals(msg)) {
 				serial.disconnect();
-			}
-			else if ("open".equals(msg)) {
-				serial.connect(portNames.get(portIndex), WINDOW_TITLE);
 			}
 			else{
 				serial.write(msg);
@@ -94,29 +77,10 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	}
 
 	@Override
-	public void handleSerialEvent(SerialEvent event, String info) {
-		pl("SERIAL EVENT: " + event + " (" + info + ")");
-		if (event == Serial.SerialEvent.PORT_DETECTED ||
-			event == Serial.SerialEvent.PORT_REMOVED) {
-			connectionMenu.removeAll();
-			portMenuItems.clear();
-			connectionMenu.add(disconnectMenuItem);
-			connectionMenu.addSeparator();
-			StringBuilder sb = new StringBuilder(20);
-			sb.append("<html>");
-			for (String name : serial.getPortNames()) {
-				JMenuItem newPortMenuItem = new JMenuItem(name);
-				connectionMenu.add(newPortMenuItem);
-				portMenuItems.add(newPortMenuItem);
-				newPortMenuItem.addActionListener(this);
-				sb.append(name);
-				sb.append("<br>");
-			}
-			sb.append("</html>");
-			portsLabel.setText(sb.toString());		
-		}
+	public void handleSerialError(String info) {
+		pl("SERIAL ERROR: " + info + ")");
 	}
-
+	
 	@Override
 	public void handleSerialData(byte[] data) {
 		pl("DATA RECEIVED: " + new String(data));
@@ -125,13 +89,43 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		if (source == disconnectMenuItem)
+		if (source == scanPortsMenuItem) {
+			updateConnectionMenu(null);
+		}
+		else if (source == disconnectMenuItem) {
 			serial.disconnect();
+			updateConnectionMenu("CONNECT");
+			
+		}
 		else {
-			for (JMenuItem portMenuItem : portMenuItems) {
+			for (int i = 0; i < portMenuItems.size(); i++) {
+				JMenuItem portMenuItem = portMenuItems.get(i);
 				if (source == portMenuItem)
-					serial.connect(portMenuItem.getText(), WINDOW_TITLE);
+					if (serial.connect(portMenuItem.getText(), WINDOW_TITLE)) {
+						connectionMenu.setText(portMenuItem.getText());
+						connectionMenu.removeAll();
+						portMenuItems.clear();
+						connectionMenu.add(disconnectMenuItem);
+						break;
+					}
 			}
+		}
+	}
+	
+	private void updateConnectionMenu(String newMenuText) {
+		if (newMenuText != null)
+			connectionMenu.setText(newMenuText);
+		connectionMenu.removeAll();
+		portMenuItems.clear();
+		connectionMenu.add(scanPortsMenuItem);
+		connectionMenu.addSeparator();
+		List<String> names = serial.getPortNames();
+		for (String name : names) {
+			JMenuItem newPortMenuItem = new JMenuItem(name);
+			newPortMenuItem.setFont(new Font(newPortMenuItem.getFont().getName(), Font.BOLD, 20));
+			newPortMenuItem.addActionListener(this);
+			connectionMenu.add(newPortMenuItem);
+			portMenuItems.add(newPortMenuItem);
 		}
 	}
 
@@ -155,22 +149,25 @@ public class SnuffCommandCenter extends JFrame implements ActionListener, Serial
 	
 	private void initializeMenuBar() {
 		JMenuBar menu = new JMenuBar();
-			connectionMenu = new JMenu("CONNECTION");
+			connectionMenu = new JMenu("CONNECT");
 				disconnectMenuItem = new JMenuItem("DISCONNECT");
+				scanPortsMenuItem = new JMenuItem("SCAN PORTS");
 				portMenuItems = new ArrayList<JMenuItem>(4);
 		
 		connectionMenu.setFont(new Font(connectionMenu.getFont().getName(), Font.BOLD, 20));
 		disconnectMenuItem.setFont(new Font(disconnectMenuItem.getFont().getName(), Font.BOLD, 20));
+		scanPortsMenuItem.setFont(new Font(scanPortsMenuItem.getFont().getName(), Font.BOLD, 20));
 		
 		connectionMenu.setMnemonic( KeyEvent.VK_C );
 		disconnectMenuItem.setMnemonic( KeyEvent.VK_D );
+		scanPortsMenuItem.setMnemonic( KeyEvent.VK_P );
 		
 		setJMenuBar(menu);
 			menu.add(connectionMenu);
-			connectionMenu.add(disconnectMenuItem);
-			connectionMenu.addSeparator();
+			connectionMenu.add(scanPortsMenuItem);
 		
 		disconnectMenuItem.addActionListener(this);
+		scanPortsMenuItem.addActionListener(this);
 	}
 	
 }
