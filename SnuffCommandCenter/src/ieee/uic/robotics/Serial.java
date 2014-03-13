@@ -147,7 +147,7 @@ public class Serial implements SerialPortEventListener {
 		ByteArrayOutputStream out = new ByteArrayOutputStream(16);
         try {
         	int received;
-			while((received = in.read(buffer)) > 0)
+			while((received = in.read(buffer)) > 0 && out.size() <= 84)
 			    out.write(buffer, 0, received);
 		} catch (IOException e) {
 			error("INPUT STREAM READ FAILED");
