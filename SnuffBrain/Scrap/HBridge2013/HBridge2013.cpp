@@ -4,18 +4,18 @@
 HBridge2014::HBridge2014() {
 	IN1_PIN = IN2_PIN = PWM_PIN = 0;
 	ATTACHED = false;
-	BRAKE_ON_ZERO = true;
-	DIRECTION = 1;
+	BRAKE_ON_ZERO = false;
+	FLIPPED_DIRECTION = false;
 	state = 0;
 }
 
 void HBridge2014::attach(unsigned char in1pin, unsigned char in2pin, unsigned char pwmPin) {
-	pinMode(in1pin, OUTPUT);
-	pinMode(in2pin, OUTPUT);
-	pinMode(pwmPin, OUTPUT);
 	IN1_PIN = in1pin;
 	IN2_PIN = in2pin;
 	PWM_PIN = pwmPin;
+	pinMode(IN1_PIN, OUTPUT);
+	pinMode(IN2_PIN, OUTPUT);
+	pinMode(PWM_PIN, OUTPUT);
 	ATTACHED = true;
 }
 
@@ -23,7 +23,7 @@ void HBridge2014::detach() {
 	ATTACHED = false;
 }
 
-bool HBridge2014::attached() {
+bool HBridge2014::isAttached() {
 	return ATTACHED;
 }
 
@@ -45,29 +45,36 @@ void HBridge2014::setBrakeOnZero(bool brakeOnZero) {
 
 void HBridge2014::setFlippedDirection(bool flipped) {
 	if (ATTACHED)
-		DIRECTION = flipped ? -1 : 1;
+		FLIPPED_DIRECTION = flipped;
 }
 
-signed char HBridge2014::toggleDirection() {
+boolean HBridge2014::toggleDirection() {
 	if (ATTACHED)
-		DIRECTION = 0 - DIRECTION;
-	return DIRECTION;
+		FLIPPED_DIRECTION = !FLIPPED_DIRECTION;
+	return FLIPPED_DIRECTION;
 }
 
 void HBridge2014::updatePins() {
-	if (state == 0) {
-		analogWrite(PWM_PIN, 0);
-		if (BRAKE_ON_ZERO) {
-			digitalWrite(IN1_PIN, LOW);
-			digitalWrite(IN2_PIN, LOW);
-		}
-		else {
-			digitalWrite(IN1_PIN, HIGH);
-			digitalWrite(IN2_PIN, HIGH);
-		}
+	if (state > 0) {
+		if (FLIPPED_DIRECTION) {
+		analogWrite(PWM_PIN, BRAKE_ON_ZERO ? 255 : 0);
+		digitalWrite(IN1_PIN, BRAKE_ON_ZERO);
+		digitalWrite(IN2_PIN, BRAKE_ON_ZERO);
+	else {
+		analogWrite(PWM_PIN, BRAKE_ON_ZERO ? 255 : 0);
+		digitalWrite(IN1_PIN, BRAKE_ON_ZERO);
+		digitalWrite(IN2_PIN, BRAKE_ON_ZERO);
+	}
+	}
+	else if (state < 0) {
+
 	}
 	else {
-		if (state * DIRECTION > 0) {
+		analogWrite(PWM_PIN, BRAKE_ON_ZERO ? 255 : 0);
+		digitalWrite(IN1_PIN, BRAKE_ON_ZERO);
+		digitalWrite(IN2_PIN, BRAKE_ON_ZERO);
+	}
+	else if (FLIPPED_DIRECTION) {
 			digitalWrite(IN1_PIN, HIGH);
 			digitalWrite(IN2_PIN, LOW);
 		}

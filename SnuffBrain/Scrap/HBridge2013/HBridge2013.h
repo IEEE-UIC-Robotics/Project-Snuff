@@ -9,7 +9,7 @@ public:
 	HBridge2014();
 	void attach(unsigned char, unsigned char, unsigned char);
 	void detach();
-	bool attached();
+	bool isAttached();
 	void write(int);
 	int read();
 	void setBrakeOnZero(bool);
@@ -25,7 +25,7 @@ private:
 	
 	bool ATTACHED;
 	bool BRAKE_ON_ZERO;
-	signed char DIRECTION;
+	bool FLIPPED_DIRECTION;
 	
 	int state;
 };

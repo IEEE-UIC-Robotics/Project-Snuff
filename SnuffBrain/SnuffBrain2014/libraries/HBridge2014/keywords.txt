@@ -1,0 +1,10 @@
+HBridge2014	KEYWORD1
+attach	KEYWORD2
+detach	KEYWORD2
+isAttached	KEYWORD2
+write	KEYWORD2
+brake	KEYWORD2
+read	KEYWORD2
+setBrakeOnZero	KEYWORD2
+setFlippedDirection	KEYWORD2
+toggleDirection	KEYWORD2

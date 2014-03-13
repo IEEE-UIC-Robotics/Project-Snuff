@@ -1,3 +1,18 @@
+#include <HBridge2014.h>
+
+#define HBRIDGE1_IN1_PIN 37
+#define HBRIDGE1_IN2_PIN 33
+#define HBRIDGE1_PWM_PIN 4
+
+#define HBRIDGE2_IN1_PIN 39
+#define HBRIDGE2_IN2_PIN 43
+#define HBRIDGE2_PWM_PIN 7
+
+#define HBRIDGE3_IN1_PIN 35
+#define HBRIDGE3_IN2_PIN 31
+#define HBRIDGE3_PWM_PIN 5
+
+
 #define OUT_ERROR 'E'
 #define OUT_PACKET_CONFIRMED 'P'
 #define OUT_PACKET_PROCESSED 'p'
@@ -10,20 +25,26 @@ boolean packetInProgress = false;
 boolean packetReceived = false;
 signed char bytesNeeded = 5;
 unsigned char packetID = 0;
+unsigned long t = 0;
+unsigned long t_packet = 0;
 
-long t;
-long t_packet;
+HBridge2014 baseHB, shoulderHB, elbowHB;
 
 ////////////////////////
-void setup(){
+void setup() {
   pinMode(13, OUTPUT);
   Serial.begin(38400);
+  
+  baseHB.attach(HBRIDGE1_IN1_PIN, HBRIDGE1_IN2_PIN, HBRIDGE1_PWM_PIN);
+  shoulderHB.attach(HBRIDGE2_IN1_PIN, HBRIDGE2_IN2_PIN, HBRIDGE2_PWM_PIN);
+  elbowHB.attach(HBRIDGE3_IN1_PIN, HBRIDGE3_IN2_PIN, HBRIDGE3_PWM_PIN);
 }
 
 ////////////////////////
-void loop(){
+void loop() {
   t = millis();
   receiveData();
+  
 }
 
 ////////////////////////
@@ -82,23 +103,45 @@ void receiveData() {
 //////////////////////////
 signed char processMessage(unsigned char messageID) {
   signed char consumedData = 0;
-  signed char echoSize = 0;
   switch (messageID) {
+    
+  case 1: {
+    boolean isFWD = Serial.read();
+    unsigned char pwm = Serial.read();
+    consumedData += 2;
+    baseHB.write(isFWD ? pwm : -pwm);
+  } break;
+  
+  case 2: {
+    boolean isFWD = Serial.read();
+    unsigned char pwm = Serial.read();
+    consumedData += 2;
+    shoulderHB.write(isFWD ? pwm : -pwm);
+  } break;
+
+  case 3: {
+    boolean isFWD = Serial.read();
+    unsigned char pwm = Serial.read();
+    consumedData += 2;
+    elbowHB.write(isFWD ? pwm : -pwm);
+  } break;
+
   case 'e':
     Serial.write(messageID);
     Serial.write(1);
     Serial.write(Serial.read());
     consumedData++;
     break;
-  case 'E':
+    
+  case 'E': {
     Serial.write(messageID);
     Serial.write(1);
-    echoSize = Serial.read();
-    consumedData++;
-    consumedData += echoSize;
+    signed char echoSize = Serial.read();
+    consumedData += 1 + echoSize;
     while (echoSize-- > 0)
       Serial.write(Serial.read());
-    break;
+  } break;
+    
   case 'T':
     digitalWrite(13, !digitalRead(13));
     break;
