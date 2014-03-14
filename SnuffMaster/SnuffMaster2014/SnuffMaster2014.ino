@@ -20,6 +20,7 @@
 #define OUT_MESSAGE_UNKNOWN '?'
 #define T_MAX_PACKET_WAIT 50
 
+// JOINT INDEXES
 #define BASE 0
 #define SHOULDER 1
 #define ELBOW 2
@@ -30,15 +31,13 @@
 #define BUTTON 7
 
 // EEPROM ADDRESSES
-const unsigned int EE_PINS[] = {0, 1, 2, 3, 4, 5, 6};
-const unsigned int EE_BUTTON_PIN = 7;
+const unsigned int EE_PINS[] = {0, 1, 2, 3, 4, 5, 6, 7};
 const unsigned int EE_MINS[] = {8, 10, 12, 14, 16, 18, 20};
 const unsigned int EE_MAXS[] = {22, 24, 26, 28, 30, 32, 34};
 const unsigned int EE_SENDING_PERIOD = 36;
 
 // CURRENT SETTINGS (INITIALIZED WITH DEFAULT VALUES)
-byte pins[] = {8, 9, 10, 11, 12, 13, 15};
-byte buttonPin = 14;
+byte pins[] = {8, 9, 10, 11, 12, 13, 15, 14};
 unsigned int maxs[] = {877, 557, 833, 945, 981, 933, 1023};
 unsigned int mins[] = {494, 181, 313, 257, 156, 225, 0};
 unsigned int sendingPeriod = 100; // 10 times per second
@@ -155,17 +154,17 @@ void receivingDataLoop() {
 char processMessage(byte messageID) {
   char consumedData = 0;
   switch (messageID) {
-  case 'M': {
+  case 'M': { // SET POT MIN LIMIT OF A JOINT (ex: MB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
     setJointMin(jointIndex, analogRead(pins[jointIndex]));
   } break;
-  case 'X': {
+  case 'X': { // SET POT MAX LIMIT OF A JOINT (ex: XB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
     setJointMax(jointIndex, analogRead(pins[jointIndex]));
   } break;
-  case 'p': {
+  case 'p': { // GET POT POSITION OF A JOINT (ex: pB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
     Serial.write(messageID);
@@ -174,7 +173,7 @@ char processMessage(byte messageID) {
     Serial.write((byte)(currentJointPosition >> 8));
     Serial.write((byte)(currentJointPosition & 0xFF));
   } break;
-  case 'm': {
+  case 'm': { // GET POT MIN LIMIT OF A JOINT (ex: mB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
     Serial.write(messageID);
@@ -182,7 +181,7 @@ char processMessage(byte messageID) {
     Serial.write((byte)(mins[jointIndex] >> 8));
     Serial.write((byte)mins[jointIndex]);
   } break;
-  case 'x': {
+  case 'x': { // GET POT MAX LIMIT OF A JOINT (ex: xB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
     Serial.write(messageID);
@@ -190,13 +189,13 @@ char processMessage(byte messageID) {
     Serial.write((byte)(maxs[jointIndex] >> 8));
     Serial.write((byte)maxs[jointIndex]);
   } break;
-  case 'F': {
+  case 'F': { // SET SENDING FREQUENCY (ex: F + 0x00 + 0x64)
     unsigned int frequency = Serial.read() << 8;
     frequency += Serial.read();
     consumedData += 2;
     setSendingFrequency(frequency);
   } break;
-  case 'T': {
+  case 'T': { // SET SENDING PERIOD (ex: T + 0x00 + 0x0A)
     unsigned int period = Serial.read() << 8;
     period += Serial.read();
     consumedData += 2;
