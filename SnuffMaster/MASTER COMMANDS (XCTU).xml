@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>false</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <packets_list>
+    <packet name="getBasePos">
+      <payload>5549432D027042</payload>
+    </packet>
+    <packet name="getShoulderPos">
+      <payload>5549432D027053</payload>
+    </packet>
+    <packet name="getElbowPos">
+      <payload>5549432D027045</payload>
+    </packet>
+    <packet name="getArmPos">
+      <payload>5549432D027041</payload>
+    </packet>
+    <packet name="getWristPos">
+      <payload>5549432D027057</payload>
+    </packet>
+    <packet name="getPalmPos">
+      <payload>5549432D027050</payload>
+    </packet>
+    <packet name="getGripperPos">
+      <payload>5549432D027047</payload>
+    </packet>
+    <packet name="getALLpos">
+      <payload>5549432D0E7042705370457041705770507047</payload>
+    </packet>
+
+    <packet name="getBaseMin">
+      <payload>5549432D026D42</payload>
+    </packet>
+    <packet name="getShoulderMin">
+      <payload>5549432D026D53</payload>
+    </packet>
+    <packet name="getElbowMin">
+      <payload>5549432D026D45</payload>
+    </packet>
+    <packet name="getArmMin">
+      <payload>5549432D026D41</payload>
+    </packet>
+    <packet name="getWristMin">
+      <payload>5549432D026D57</payload>
+    </packet>
+    <packet name="getPalmMin">
+      <payload>5549432D026D50</payload>
+    </packet>
+    <packet name="getGripperMin">
+      <payload>5549432D026D47</payload>
+    </packet>
+    <packet name="getALLmin">
+      <payload>5549432D0E6D426D536D456D416D576D506D47</payload>
+    </packet>
+
+    <packet name="getBaseMax">
+      <payload>5549432D027842</payload>
+    </packet>
+    <packet name="getShoulderMax">
+      <payload>5549432D027853</payload>
+    </packet>
+    <packet name="getElbowMax">
+      <payload>5549432D027845</payload>
+    </packet>
+    <packet name="getArmMax">
+      <payload>5549432D027841</payload>
+    </packet>
+    <packet name="getWristMax">
+      <payload>5549432D027857</payload>
+    </packet>
+    <packet name="getPalmMax">
+      <payload>5549432D027850</payload>
+    </packet>
+    <packet name="getGripperMax">
+      <payload>5549432D027847</payload>
+    </packet>
+    <packet name="getALLmax">
+      <payload>5549432D0E7842785378457841785778507847</payload>
+    </packet>
+
+    <packet name="setBaseMin">
+      <payload>5549432D024D42</payload>
+    </packet>
+    <packet name="setShoulderMin">
+      <payload>5549432D024D53</payload>
+    </packet>
+    <packet name="setElbowMin">
+      <payload>5549432D024D45</payload>
+    </packet>
+    <packet name="setArmMin">
+      <payload>5549432D024D41</payload>
+    </packet>
+    <packet name="setWristMin">
+      <payload>5549432D024D57</payload>
+    </packet>
+    <packet name="setPalmMin">
+      <payload>5549432D024D50</payload>
+    </packet>
+    <packet name="setGripperMin">
+      <payload>5549432D024D47</payload>
+    </packet>
+    <packet name="setALLmin">
+      <payload>5549432D0E4D424D534D454D414D574D504D47</payload>
+    </packet>
+
+    <packet name="setBaseMax">
+      <payload>5549432D025842</payload>
+    </packet>
+    <packet name="setShoulderMax">
+      <payload>5549432D025853</payload>
+    </packet>
+    <packet name="setElbowMax">
+      <payload>5549432D025845</payload>
+    </packet>
+    <packet name="setArmMax">
+      <payload>5549432D025841</payload>
+    </packet>
+    <packet name="setWristMax">
+      <payload>5549432D025857</payload>
+    </packet>
+    <packet name="setPalmMax">
+      <payload>5549432D025850</payload>
+    </packet>
+    <packet name="setGripperMax">
+      <payload>5549432D025847</payload>
+    </packet>
+    <packet name="setALLmax">
+      <payload>5549432D0E5842585358455841585758505847</payload>
+    </packet>
+
+    <packet name="toggleBaseInversion">
+      <payload>5549432D027442</payload>
+    </packet>
+    <packet name="toggleShoulderInversion">
+      <payload>5549432D027453</payload>
+    </packet>
+    <packet name="toggleElbowInversion">
+      <payload>5549432D027445</payload>
+    </packet>
+    <packet name="toggleArmInversion">
+      <payload>5549432D027441</payload>
+    </packet>
+    <packet name="toggleWristInversion">
+      <payload>5549432D027457</payload>
+    </packet>
+    <packet name="togglePalmInversion">
+      <payload>5549432D027450</payload>
+    </packet>
+    <packet name="toggleGripperInversion">
+      <payload>5549432D027447</payload>
+    </packet>
+    <packet name="toggleALLinversion">
+      <payload>5549432D0E7442745374457441745774507447</payload>
+    </packet>
+
+    <packet name="STOP SENDING">
+      <payload>5549432D03460000</payload>
+    </packet>
+
+    <packet name="SEND AT 50Hz">
+      <payload>5549432D03460032</payload>
+    </packet>
+
+    <packet name="SEND AT 100Hz">
+      <payload>5549432D03460064</payload>
+    </packet>
+
+  </packets_list>
+</data>
