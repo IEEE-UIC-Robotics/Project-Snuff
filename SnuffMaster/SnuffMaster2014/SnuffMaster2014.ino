@@ -35,12 +35,16 @@ const unsigned int EE_PINS[] = {0, 1, 2, 3, 4, 5, 6, 7};
 const unsigned int EE_MINS[] = {8, 10, 12, 14, 16, 18, 20};
 const unsigned int EE_MAXS[] = {22, 24, 26, 28, 30, 32, 34};
 const unsigned int EE_SENDING_PERIOD = 36;
+const unsigned int EE_FLIP[] = {38, 39, 40, 41, 42, 43, 44, 45};
+const unsigned int EE_MIDS[] = {47, 49, 51, 53, 55, 57, 59, 61};
 
 // CURRENT SETTINGS (INITIALIZED WITH DEFAULT VALUES)
 byte pins[] = {8, 9, 10, 11, 12, 13, 15, 14};
 unsigned int maxs[] = {877, 557, 833, 945, 981, 933, 1023};
 unsigned int mins[] = {494, 181, 313, 257, 156, 225, 0};
-unsigned int sendingPeriod = 100; // 10 times per second
+unsigned int sendingPeriod = 20; // 50 times per second
+boolean flip[] = {0, 0, 0, 0, 0, 0, 0, 0};
+unsigned int mids[] = {0, 0, 0, 0, 0, 0, 0, 0,};
 
 // CURRENT STATE
 unsigned int positionData[] = {0, 0, 0, 0, 0, 0, 0};
@@ -59,7 +63,7 @@ unsigned long t_packet = 0;
 boolean sendingEnabled = true;
 
 void setup() {
-  //loadSettingsFromEEPROM();
+  loadSettingsFromEEPROM();
   Serial.begin(38400);
 }
 
@@ -76,10 +80,21 @@ void loop() {
 
 void readPositionData() {
   for (byte i = 0; i < 7; i++) {
-    positionData[i] = constrain(analogRead(pins[i]), mins[i], maxs[i]);
-    mappedData[i] = map(positionData[i], mins[i], maxs[i], 0, 255);
+    unsigned int actualMin = mins[i];
+    unsigned int actualMax = maxs[i];
+    if (actualMin > actualMax) {
+      unsigned int temp = actualMin;
+      actualMin = actualMax;
+      actualMax = actualMin;
+    }
+    positionData[i] = constrain(analogRead(pins[i]), actualMin, actualMax);
+    mappedData[i] = map(positionData[i], actualMin, actualMax, flip[i] ? 255 : 0, flip[i] ? 0 : 255);
+    if (flip[i])
+      mappedData[i] = 255 - mappedData[i];
   }
-  mappedData[BUTTON] = analogRead(buttonPin) < 512 ? 255 : 0;
+  mappedData[BUTTON] = analogRead(pins[BUTTON]) < 512 ? 255 : 0;
+  if (mappedData[BUTTON] != 0)
+    mappedData[GRIPPER] = 200;
 }
 
 void sendPositionData() {
@@ -164,6 +179,15 @@ char processMessage(byte messageID) {
     consumedData++;
     setJointMax(jointIndex, analogRead(pins[jointIndex]));
   } break;
+  case 't': { // TOGGLE JOINT INVERTING SETTING (ex: tB)
+    char jointIndex = getJointIndex(Serial.read());
+    consumedData++;
+    flip[jointIndex] = !flip[jointIndex];
+    EEPROM.write(EE_FLIP[jointIndex], flip[jointIndex] ? 255 : 0);
+    Serial.write(messageID);
+    Serial.write(1);
+    Serial.write(flip[jointIndex] ? 'F' : 'N');
+  } break;
   case 'p': { // GET POT POSITION OF A JOINT (ex: pB)
     char jointIndex = getJointIndex(Serial.read());
     consumedData++;
@@ -201,6 +225,8 @@ char processMessage(byte messageID) {
     consumedData += 2;
     setSendingPeriod(period);
   } break;
+  case '':{ // SET MIDDLE VALUE
+  }
   default:
     Serial.write(messageID);
     Serial.write(1);
@@ -212,9 +238,18 @@ char processMessage(byte messageID) {
 
 void loadSettingsFromEEPROM() {
   for (int i = 0; i < 8; i++) {
-    pins[i] = EEPROM.read(EE_PINS[i]);
+    //pins[i] = EEPROM.read(EE_PINS[i]);
     mins[i] = loadINTfromEEPROM(EE_MINS[i]);
     maxs[i] = loadINTfromEEPROM(EE_MAXS[i]);
+    int currentMid;
+    if((currentMid = loadINTfromEEPROM(EE_MIDS[i])) == 0){
+      currentMid = (mins[i] + maxs[i])/2;
+      mids[i] = currentMid;
+      storeINTtoEEPROM(EE_MIDS[i], currentMid);
+    }else{
+      mids[i] = currentMid;
+    }
+    flip[i] = EEPROM.read(EE_FLIP[i]);
   }
   sendingPeriod = loadINTfromEEPROM(EE_SENDING_PERIOD);
 }
